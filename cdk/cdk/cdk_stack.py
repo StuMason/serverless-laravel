@@ -14,22 +14,13 @@ class CdkStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        vpc = ec2.Vpc(self, "VPC", max_azs=3, nat_gateways=1)
+        # vpc = ec2.Vpc(self, "VPC", max_azs=3, nat_gateways=1)
 
-        laravel_web = lambda_.Function(self, "laravel_web",
-            runtime=lambda_.Runtime.PROVIDED_AL2,
-            handler="public/index.php",
-            code=lambda_.Code.from_asset("../codebase"),
-            vpc=vpc,
-            layers=[
-                lambda_.LayerVersion.from_layer_version_arn(
-                    self, 
-                    "bref_php_layer",
-                    "arn:aws:lambda:eu-west-2:209497400698:layer:php-81-fpm:19"
-                )
-            ],
+        laravel_web = lambda_.DockerImageFunction(self, "docker_laravel",
+            code=lambda_.DockerImageCode.from_image_asset("../codebase"),
+            memory_size=1024,
             timeout=Duration.seconds(120),
-            environment={"APP_STORAGE": "/tmp","APP_ENV": "production"}
+            # vpc=vpc,
         )
 
         web_integration = HttpLambdaIntegration("laravel_web_integration", laravel_web)
