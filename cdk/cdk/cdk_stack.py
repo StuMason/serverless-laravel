@@ -17,46 +17,46 @@ class CdkStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        vpc = ec2.Vpc(self, "vpc", max_azs=3, nat_gateways=1)
+        # vpc = ec2.Vpc(self, "vpc", max_azs=3, nat_gateways=1)
 
-        lambda_to_proxy_group = ec2.SecurityGroup(self, 'Lambda to RDS Proxy Connection', vpc=vpc)
+        # lambda_to_proxy_group = ec2.SecurityGroup(self, 'Lambda to RDS Proxy Connection', vpc=vpc)
 
-        db_connection_group = ec2.SecurityGroup(self, 'Proxy to DB Connection', vpc=vpc)
-        db_connection_group.add_ingress_rule(db_connection_group,ec2.Port.tcp(3306), 'allow db connection')
-        db_connection_group.add_ingress_rule(lambda_to_proxy_group, ec2.Port.tcp(3306), 'allow lambda connection')
+        # db_connection_group = ec2.SecurityGroup(self, 'Proxy to DB Connection', vpc=vpc)
+        # db_connection_group.add_ingress_rule(db_connection_group,ec2.Port.tcp(3306), 'allow db connection')
+        # db_connection_group.add_ingress_rule(lambda_to_proxy_group, ec2.Port.tcp(3306), 'allow lambda connection')
 
-        secret = secretsmanager.Secret.from_secret_name_v2(self, "rds_secret", "rds")
+        # secret = secretsmanager.Secret.from_secret_name_v2(self, "rds_secret", "rds")
 
-        credents = rds.Credentials.from_secret(secret)
+        # credents = rds.Credentials.from_secret(secret)
 
-        db = rds.DatabaseInstance(self, "db",
-            engine=rds.DatabaseInstanceEngine.MYSQL,
-            instance_type=ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.SMALL),
-            vpc=vpc,
-            credentials=credents, 
-            security_groups=[db_connection_group],
-            database_name="serverless_laravel"
-        )
+        # db = rds.DatabaseInstance(self, "db",
+        #     engine=rds.DatabaseInstanceEngine.MYSQL,
+        #     instance_type=ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.SMALL),
+        #     vpc=vpc,
+        #     credentials=credents, 
+        #     security_groups=[db_connection_group],
+        #     database_name="serverless_laravel"
+        # )
 
-        proxy = db.add_proxy("proxy",
-            borrow_timeout=Duration.seconds(30),
-            secrets=[db.secret],
-            vpc=vpc,
-            security_groups=[db_connection_group],
-            require_tls=False
-        )
+        # proxy = db.add_proxy("proxy",
+        #     borrow_timeout=Duration.seconds(30),
+        #     secrets=[db.secret],
+        #     vpc=vpc,
+        #     security_groups=[db_connection_group],
+        #     require_tls=False
+        # )
 
         laravel_web = lambda_.DockerImageFunction(self, "laravel",
             code=lambda_.DockerImageCode.from_image_asset("../codebase"),
             memory_size=1024,
             timeout=Duration.seconds(120),
-            vpc=vpc,
-            environment={
-                "DB_HOST": proxy.endpoint,
-                "DB_USERNAME": "admin",
-                "DB_PASSWORD": "password"
-            },
-            security_groups=[lambda_to_proxy_group]
+            # vpc=vpc,
+            # environment={
+            #     "DB_HOST": proxy.endpoint,
+            #     "DB_USERNAME": "admin",
+            #     "DB_PASSWORD": "password"
+            # },
+            # security_groups=[lambda_to_proxy_group]
         )
 
         web_integration = HttpLambdaIntegration("laravel_web_integration", laravel_web)
