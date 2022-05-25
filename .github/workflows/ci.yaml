@@ -26,6 +26,7 @@ jobs:
         uses: youyo/aws-cdk-github-actions@v2
         with:
           cdk_subcommand: 'diff'
+          cdk_stack: 'cdk-serverless-laravel-staging'
           actions_comment: true
         env:
           AWS_DEFAULT_REGION: 'eu-west-2'
