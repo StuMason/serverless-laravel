@@ -29,7 +29,7 @@ class CdkStack(Stack):
             conditions={
                 "StringLike": {
                     'token.actions.githubusercontent.com:sub':
-                        f'repo:stumason/serverless-laravel:*'
+                        f'repo:StuMason/serverless-laravel:*'
                 }
             }
         )
