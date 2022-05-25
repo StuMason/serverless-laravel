@@ -20,7 +20,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@master
         with:
           role-to-assume: arn:aws:iam::982195495700:role/serverless-laravel-deploy-staging
-          aws-region: eu-west-1
+          aws-region: eu-west-2
 
       - name: cdk deploy
         uses: youyo/aws-cdk-github-actions@v2
