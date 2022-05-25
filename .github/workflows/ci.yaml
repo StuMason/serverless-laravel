@@ -22,12 +22,10 @@ jobs:
           role-to-assume: arn:aws:iam::982195495700:role/serverless-laravel-deploy-staging
           aws-region: eu-west-2
 
-      - name: move to CDK dir
-        runs: cd cdk
-
       - name: cdk diff
         uses: youyo/aws-cdk-github-actions@v2
         with:
+          working_dir: './cdk'
           cdk_subcommand: 'diff'
           cdk_stack: 'cdk-serverless-laravel-staging'
           actions_comment: true
@@ -37,6 +35,7 @@ jobs:
       - name: cdk deploy
         uses: youyo/aws-cdk-github-actions@v2
         with:
+          working_dir: './cdk'
           cdk_subcommand: 'deploy'
           cdk_stack: 'cdk-serverless-laravel-staging'
           cdk_args: '--require-approval never'
