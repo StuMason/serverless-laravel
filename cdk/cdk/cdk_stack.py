@@ -17,7 +17,7 @@ class CdkStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, stage: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        oidc_arn = f"arn:aws:iam::{Stack.of(self).account}:oidc-provider/token.actions.githubusercontent.com"
+        oidc_arn = f"arn:aws:iam::{self.account}:oidc-provider/token.actions.githubusercontent.com"
 
         provider = iam.OpenIdConnectProvider.from_open_id_connect_provider_arn(
             self, 
