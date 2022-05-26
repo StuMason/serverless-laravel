@@ -11,52 +11,17 @@ from aws_cdk import (
 from aws_cdk.aws_apigatewayv2_integrations_alpha import HttpLambdaIntegration
 from aws_cdk.aws_apigatewayv2_alpha import HttpApi
 from constructs import Construct
+from cdk.github_connection import GithubConnection
 
 class CdkStack(Stack):
 
     def __init__(self, scope: Construct, construct_id: str, stage: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        oidc_arn = f"arn:aws:iam::{self.account}:oidc-provider/token.actions.githubusercontent.com"
-
-        provider = iam.OpenIdConnectProvider.from_open_id_connect_provider_arn(
-            self, 
-            'github_provider', 
-            oidc_arn
-        )
-
-        principle = iam.OpenIdConnectPrincipal(provider).with_conditions(
-            conditions={
-                "StringLike": {
-                    'token.actions.githubusercontent.com:sub':
-                        f'repo:StuMason/serverless-laravel:*'
-                }
-            }
-        )
-
-        principle.add_to_principal_policy(
-            iam.PolicyStatement(
-                effect=iam.Effect.ALLOW,
-                actions=["sts:AssumeRoleWithWebIdentity"],
-                resources=["*"]
-            )
-        )
-
-        iam.Role(self, "deployment_role",
-            assumed_by=principle,
-            role_name=f"serverless-laravel-deploy-{stage}",
-            max_session_duration=Duration.seconds(3600),
-            inline_policies={
-                "DeploymentPolicy": iam.PolicyDocument(
-                    statements=[
-                        iam.PolicyStatement(
-                            actions=['sts:AssumeRole'],
-                            resources=[f'arn:aws:iam::{self.account}:role/cdk-*'],
-                            effect=iam.Effect.ALLOW
-                        )
-                    ]
-                )
-            }
+        GithubConnection(self, 
+            "github_connection", 
+            github_org="StuMason", 
+            github_repo="serverless-laravel"
         )
 
         # vpc = ec2.Vpc(self, "vpc", max_azs=3, nat_gateways=1)
